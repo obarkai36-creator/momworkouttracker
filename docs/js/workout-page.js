@@ -53,7 +53,6 @@ async function init(workout) {
   // Declared before any `await` below so the body-map click handler (which
   // can fire while that fetch is still pending) never reads these mid-TDZ.
   let currentLevel = null;
-  let lastSavedLevel = null;
   let coreVariantIndex = 0;
 
   const fatigueState = {};
@@ -74,6 +73,7 @@ async function init(workout) {
     if (!btn) return;
     onPickLevel(btn.dataset.level);
   });
+  document.getElementById("completeBtn").addEventListener("click", onCompleteWorkout);
 
   if (configured) {
     try {
@@ -108,33 +108,46 @@ async function init(workout) {
     document.getElementById("pickPrompt").style.display = "none";
   }
 
-  async function onPickLevel(level) {
+  function onPickLevel(level) {
     loadPick.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b.dataset.level === level));
     currentLevel = level;
     renderPlan(level);
+    // Picking a level only shows the plan — nothing is logged until she
+    // explicitly marks the workout complete (onCompleteWorkout below).
+    document.getElementById("saveConfirm").classList.remove("show");
+  }
 
-    if (level === lastSavedLevel) return;
-    lastSavedLevel = level;
+  async function onCompleteWorkout() {
+    if (!currentLevel) return;
 
+    const completeBtn = document.getElementById("completeBtn");
     const confirmEl = document.getElementById("saveConfirm");
+
     if (!configured) {
-      confirmEl.textContent = "Firebase לא מוגדר — התוכנית מוצגת אך לא נשמרת (ראו README.md).";
+      confirmEl.textContent = "Firebase לא מוגדר — האימון לא ניתן לשמירה כרגע (ראו README.md).";
       confirmEl.classList.add("show");
       return;
     }
+
+    completeBtn.disabled = true;
+    completeBtn.textContent = "שומר…";
     try {
       await saveSession({
         workoutId: workout.id,
         workoutLabel: workout.label,
         date: todayIso(),
-        desiredLoad: level,
+        desiredLoad: currentLevel,
         coreVariantIndex,
         fatigue: { ...fatigueState },
+        notes: document.getElementById("workoutNotes").value.trim(),
       });
-      confirmEl.textContent = "✓ נרשם";
+      completeBtn.textContent = "✓ האימון נשמר";
+      confirmEl.textContent = "האימון נרשם בהצלחה!";
       confirmEl.classList.add("show");
     } catch (e) {
       console.error("Failed to save session", e);
+      completeBtn.disabled = false;
+      completeBtn.textContent = "✓ סיימתי את האימון";
       confirmEl.textContent = "השמירה נכשלה — יש לבדוק את הגדרות Firebase (ראו README.md).";
       confirmEl.classList.add("show");
     }

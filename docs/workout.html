@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>רישום אימון — לוח האימונים של שגית</title>
-<link rel="stylesheet" href="css/tokens.css?v=2026-09-26-5">
-<link rel="stylesheet" href="css/dashboard.css?v=2026-09-26-5">
-<link rel="stylesheet" href="css/rtl.css?v=2026-09-26-5">
-<link rel="stylesheet" href="css/site.css?v=2026-09-26-5">
+<link rel="stylesheet" href="css/tokens.css?v=2026-09-26-6">
+<link rel="stylesheet" href="css/dashboard.css?v=2026-09-26-6">
+<link rel="stylesheet" href="css/rtl.css?v=2026-09-26-6">
+<link rel="stylesheet" href="css/site.css?v=2026-09-26-6">
 </head>
 <body>
 <div class="wrap">
@@ -34,7 +34,6 @@
   <div class="panel span" style="margin-bottom:16px;">
     <h2>עומס רצוי לאימון</h2>
     <div class="loadpick" id="loadPick" style="margin-bottom:8px;"></div>
-    <div class="save-confirm" id="saveConfirm"></div>
   </div>
 
   <div id="planSection" style="display:none;">
@@ -49,11 +48,21 @@
 
     <div class="section-eyebrow">מתיחות</div>
     <div class="panel span" id="stretchPanel"></div>
+
+    <div class="section-eyebrow">סיום האימון</div>
+    <div class="panel span">
+      <div class="field">
+        <label for="workoutNotes">הערות לגבי האימון (לא חובה)</label>
+        <textarea id="workoutNotes" rows="3" placeholder="איך הרגשת? הערות נוספות…"></textarea>
+      </div>
+      <button class="btn-primary" id="completeBtn" style="margin-top:12px;">✓ סיימתי את האימון</button>
+      <div class="save-confirm" id="saveConfirm"></div>
+    </div>
   </div>
 
   <div class="empty-state" id="pickPrompt">בחרי עומס למעלה כדי לראות את תוכנית האימון המלאה.</div>
 </div>
 
-<script type="module" src="js/workout-page.js?v=2026-09-26-5"></script>
+<script type="module" src="js/workout-page.js?v=2026-09-26-6"></script>
 </body>
 </html>

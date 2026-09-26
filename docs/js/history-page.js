@@ -38,6 +38,7 @@ function sessionDetailHtml(workout, session) {
     <div class="dgrid" style="margin-bottom:16px;">
       <div class="dpanel"><h4>עומס שנבחר</h4>${loadBadge(session.desiredLoad)}</div>
       <div class="dpanel"><h4>עייפות שדווחה לפני האימון</h4>${fatigueSummaryHtml(session.fatigue)}</div>
+      <div class="dpanel span"><h4>הערות</h4><div class="status-note-text">${session.notes || "—"}</div></div>
     </div>
     <div class="scrollbox">
       <table class="datatable">
