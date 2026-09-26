@@ -28,9 +28,48 @@ function wireLoadPicker(container) {
   });
 }
 
+function videoLinkHtml(url) {
+  if (!url) return "";
+  return `<a class="btn-secondary" href="${url}" target="_blank" rel="noopener" style="margin-top:8px;">▶ צפו בהדגמה</a>`;
+}
+
+/** Renders one loggable exercise card (used for both main exercises and
+ * the end-of-workout core/ab exercises — same fields, same saving logic). */
+function exerciseCardHtml(ex, i) {
+  const isTime = ex.durationSec != null;
+  const targetText = isTime ? `${ex.sets} סטים × ${ex.durationSec} שניות` : `${ex.sets} סטים × ${ex.reps} חזרות`;
+  const secondField = isTime
+    ? `<div class="field"><label for="reps-${i}">משך בפועל (שניות)</label><input type="number" id="reps-${i}" min="0" step="1" value="${ex.durationSec}" inputmode="numeric"></div>`
+    : `<div class="field"><label for="reps-${i}">חזרות שבוצעו</label><input type="number" id="reps-${i}" min="0" step="1" value="${ex.reps}" inputmode="numeric"></div>`;
+
+  return `
+  <div class="exercise-card" data-index="${i}">
+    <h4>${ex.name}</h4>
+    <div class="target">${targetText}${ex.note ? ` · ${ex.note}` : ""}</div>
+    <div class="exercise-fields">
+      <div class="field">
+        <label for="weight-${i}">משקל (ק"ג)</label>
+        <input type="number" id="weight-${i}" min="0" step="0.5" inputmode="decimal">
+      </div>
+      ${secondField}
+    </div>
+    <div class="field">
+      <label>עומס לתרגיל</label>
+      <div class="loadpick" id="loadpick-${i}"></div>
+    </div>
+    ${videoLinkHtml(ex.youtubeUrl)}
+  </div>`;
+}
+
+function stretchListHtml(stretches) {
+  return `<ul class="evul">${stretches
+    .map((s) => `<li><b>${s.name}</b> ${videoLinkHtml(s.youtubeUrl)}</li>`)
+    .join("")}</ul>`;
+}
+
 function init(workout) {
   document.getElementById("workoutTitle").textContent = `${workout.label} (${workout.dateLabel})`;
-  document.getElementById("workoutSubtitle").textContent = `3 סטים × 12 חזרות לכל תרגיל · ${workout.exercises.length} תרגילים`;
+  document.getElementById("workoutSubtitle").textContent = `3 סטים × 12 חזרות לכל תרגיל · דגש: ${workout.focus}`;
 
   const configured = checkFirebaseReady();
   document.getElementById("saveBtn").disabled = !configured;
@@ -41,53 +80,46 @@ function init(workout) {
   overallPick.innerHTML = loadPickerHtml("overall");
   wireLoadPicker(document.getElementById("detailsPanel"));
 
-  const list = document.getElementById("exerciseList");
-  list.innerHTML = workout.exercises
-    .map(
-      (ex, i) => `
-    <div class="exercise-card" data-index="${i}">
-      <h4>${ex.name}</h4>
-      <div class="target">${ex.sets} סטים × ${ex.reps} חזרות</div>
-      <div class="exercise-fields">
-        <div class="field">
-          <label for="weight-${i}">משקל (ק"ג)</label>
-          <input type="number" id="weight-${i}" min="0" step="0.5" inputmode="decimal">
-        </div>
-        <div class="field">
-          <label for="reps-${i}">חזרות שבוצעו</label>
-          <input type="number" id="reps-${i}" min="0" step="1" value="${ex.reps}" inputmode="numeric">
-        </div>
-      </div>
-      <div class="field">
-        <label>עומס לתרגיל</label>
-        <div class="loadpick" id="loadpick-${i}"></div>
-      </div>
-    </div>`
-    )
-    .join("");
+  // Main exercises and the end-of-workout core/ab exercises are logged the
+  // same way, so they're indexed as one continuous list (loggableExercises)
+  // even though they render into two separate sections on the page.
+  const loggableExercises = [...workout.exercises, ...workout.core];
+  const coreStartIndex = workout.exercises.length;
 
-  workout.exercises.forEach((_, i) => {
+  document.getElementById("exerciseList").innerHTML = workout.exercises
+    .map((ex, i) => exerciseCardHtml(ex, i))
+    .join("");
+  document.getElementById("coreList").innerHTML = workout.core
+    .map((ex, i) => exerciseCardHtml(ex, coreStartIndex + i))
+    .join("");
+  document.getElementById("stretchPanel").innerHTML = stretchListHtml(workout.stretches);
+
+  loggableExercises.forEach((_, i) => {
     document.getElementById(`loadpick-${i}`).innerHTML = loadPickerHtml(`ex-${i}`);
   });
-  wireLoadPicker(list);
+  wireLoadPicker(document.getElementById("exerciseList"));
+  wireLoadPicker(document.getElementById("coreList"));
 
-  document.getElementById("saveBtn").addEventListener("click", () => onSave(workout));
+  document.getElementById("saveBtn").addEventListener("click", () => onSave(workout, loggableExercises));
 }
 
-async function onSave(workout) {
+async function onSave(workout, loggableExercises) {
   const saveBtn = document.getElementById("saveBtn");
   const confirmEl = document.getElementById("saveConfirm");
   saveBtn.disabled = true;
   saveBtn.textContent = "שומר…";
 
-  const exercises = workout.exercises.map((ex, i) => {
+  const exercises = loggableExercises.map((ex, i) => {
     const pick = document.getElementById(`loadpick-${i}`);
+    const isTime = ex.durationSec != null;
     return {
       name: ex.name,
       targetSets: ex.sets,
-      targetReps: ex.reps,
+      targetReps: isTime ? null : ex.reps,
+      targetDurationSec: isTime ? ex.durationSec : null,
       weightKg: parseFloat(document.getElementById(`weight-${i}`).value) || null,
-      repsDone: parseInt(document.getElementById(`reps-${i}`).value, 10) || null,
+      repsDone: isTime ? null : parseInt(document.getElementById(`reps-${i}`).value, 10) || null,
+      durationDoneSec: isTime ? parseInt(document.getElementById(`reps-${i}`).value, 10) || null : null,
       loadTag: pick?.dataset.value || null,
     };
   });

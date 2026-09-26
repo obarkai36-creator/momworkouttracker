@@ -14,15 +14,21 @@ function loadBadge(level) {
 
 function sessionDetailHtml(session) {
   const rows = session.exercises
-    .map(
-      (ex) => `
+    .map((ex) => {
+      const amount =
+        ex.durationDoneSec != null
+          ? `${ex.durationDoneSec} שנ'`
+          : ex.repsDone != null
+          ? ex.repsDone
+          : "—";
+      return `
     <tr>
       <td>${ex.name}</td>
       <td class="num">${ex.weightKg != null ? ex.weightKg + " ק\"ג" : "—"}</td>
-      <td class="num">${ex.repsDone != null ? ex.repsDone : "—"}</td>
+      <td class="num">${amount}</td>
       <td>${loadBadge(ex.loadTag)}</td>
-    </tr>`
-    )
+    </tr>`;
+    })
     .join("");
 
   return `
@@ -32,7 +38,7 @@ function sessionDetailHtml(session) {
     </div>
     <div class="scrollbox">
       <table class="datatable">
-        <thead><tr><th>תרגיל</th><th>משקל</th><th>חזרות</th><th>עומס</th></tr></thead>
+        <thead><tr><th>תרגיל</th><th>משקל</th><th>חזרות/משך</th><th>עומס</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
