@@ -1,0 +1,26 @@
+/* RTL adaptation layer for the "soft sky" dashboard kit (tokens.css /
+ * dashboard.css), which ships LTR-first. Load this AFTER dashboard.css.
+ * Only the handful of rules that use a physical left/right (not affected
+ * by dir="rtl" alone — flexbox justify-content/gap already auto-mirror)
+ * need a mirrored override here. Keep dashboard.css itself untouched so
+ * it stays a clean drop-in target for future skill updates. */
+
+html { direction: rtl; }
+
+/* tile "open" chevron sits on the trailing edge — in RTL that's the left */
+.tile .go { right: auto; left: 20px; }
+.tile.tap:hover .go { transform: translateX(-2px); }
+
+/* accent bars read as a leading-edge marker — in RTL that's the right */
+.metric-tip,
+.alert-row { border-left: none; border-right: 3px solid var(--warn); }
+.alert-row.low { border-right-color: var(--text-3); border-left-color: transparent; }
+
+/* data tables: text starts at the right, numeric columns stay left-set */
+table.datatable th,
+table.datatable td { text-align: right; }
+table.datatable td.num { text-align: left; }
+
+@media (max-width: 520px) {
+  .hero { text-align: right; }
+}
