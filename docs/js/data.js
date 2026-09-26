@@ -28,10 +28,13 @@
 //    ריר דלט פליי/Reverse fly), כדאי להציע כתחליף.
 //  - "ישבן בגומייה" הוסר לגמרי (ללא תחליף שהתבקש).
 //  - "דדליפט על ספסל – סינגל לג" → "כפיפת ברכיים בישיבה במכונה". שימו לב:
-//    זה מאבד את תבנית התנועה של כפיפת ירך (hip-hinge) מהאימון לגמרי, ויוצר
-//    כפילות עם "כפיפת ברכיים בשכיבה במכונה" הקיים (שניהם בידוד המסטרינג
-//    בכיפוף ברך). שווה לשקול אם המכון כן מאפשר תבנית hip-hinge כלשהי
-//    (רומנית עם משקולות, גם-גוד-מורנינג וכו').
+//    זה מאבד את תבנית התנועה של כפיפת ירך (hip-hinge) מהאימון לגמרי. שווה
+//    לשקול אם המכון כן מאפשר תבנית hip-hinge כלשהי (רומנית עם משקולות,
+//    גם-גוד-מורנינג וכו').
+//  - "כפיפת ברכיים בשכיבה במכונה" הוסר (המכון לא כולל מכונת שכיבה) והוחלף
+//    ב"בעיטה אחורית בישבן במכונה" — שימו לב שזה מעביר את הכיסוי מהמסטרינג
+//    לישבן (גלוטאוס כבר מכוסה היטב באימון הזה עם 3-4 תרגילים; המסטרינג נשאר
+//    עם תרגיל בידוד יחיד בלבד — כפיפת ברכיים בישיבה).
 export const WORKOUTS = [
   {
     id: "upper-body",
@@ -94,7 +97,7 @@ export const WORKOUTS = [
       { name: "הרחקה בישיבה", nameEn: "Seated Hip Abduction", muscle: "glutes", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=5O_Y9l__iao" },
       { name: "לאנצ' על מדרגה", nameEn: "Step Lunge", muscle: "quads", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=QNq2xfnX9IU" },
       { name: "כפיפת ברכיים בישיבה במכונה", nameEn: "Seated Leg Curl Machine", muscle: "hamstrings", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=t9sTSr-JYSs", note: "הוחלף מדדליפט על ספסל" },
-      { name: "כפיפת ברכיים בשכיבה במכונה", nameEn: "Lying Leg Curl Machine", muscle: "hamstrings", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=vl5nUdE9mWM", note: "המסטרינג בבידוד — כפילות זווית עם התרגיל שמעליו, ראו הערה למטה" },
+      { name: "בעיטה אחורית בישבן במכונה", nameEn: "Glute Kickback Machine", muscle: "glutes", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=24pvhNOoK80", note: "נוסף במקום כפיפת ברכיים בשכיבה שהוסרה" },
       { name: "הרמת שוקיים בעמידה", nameEn: "Standing Calf Raise", muscle: "calves", sets: 3, reps: 15, youtubeUrl: "https://www.youtube.com/watch?v=ndQc4mz4mBU" },
     ],
     coreVariants: [
