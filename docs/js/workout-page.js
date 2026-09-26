@@ -26,7 +26,16 @@ function fatigueWarningHtml(muscle, fatigueState) {
   return `<div style="margin-top:8px;"><span class="load-badge" data-level="${badgeLevel}">⚠ ${text}</span></div>`;
 }
 
-function exerciseCardHtml(ex, fatigueState) {
+function weightInputHtml(idx) {
+  if (idx == null) return "";
+  return `
+    <div class="field" style="margin-top:10px;">
+      <label for="bw-${idx}">משקל בק"ג (לתיעוד ראשוני — לצורך נקודת ייחוס להמשך)</label>
+      <input type="number" id="bw-${idx}" min="0" step="0.5" inputmode="decimal">
+    </div>`;
+}
+
+function exerciseCardHtml(ex, fatigueState, weightIdx = null) {
   const isTime = ex.durationSec != null;
   const targetText = isTime ? `${ex.sets} סטים × ${ex.durationSec} שניות` : `${ex.sets} סטים × ${ex.reps} חזרות`;
   return `
@@ -35,6 +44,7 @@ function exerciseCardHtml(ex, fatigueState) {
     <div class="target">${targetText}${ex.note ? ` · ${ex.note}` : ""} · ${MUSCLE_LABELS[ex.muscle] || ""}</div>
     ${fatigueWarningHtml(ex.muscle, fatigueState)}
     ${videoLinkHtml(ex.youtubeUrl)}
+    ${weightInputHtml(weightIdx)}
   </div>`;
 }
 
@@ -54,6 +64,12 @@ async function init(workout) {
   // can fire while that fetch is still pending) never reads these mid-TDZ.
   let currentLevel = null;
   let coreVariantIndex = 0;
+  // First time this workout is ever done, she gets a weight-per-exercise
+  // field to establish a baseline reference point (nothing to compare future
+  // sessions against otherwise). Defaults to true if history can't be
+  // checked (not configured yet) - showing the field costs nothing if wrong.
+  let isFirstTime = true;
+  let weightedItems = []; // [{ name, idx }] for the currently-rendered plan
 
   const fatigueState = {};
   const bodyMapContainer = document.getElementById("bodyMapContainer");
@@ -80,6 +96,7 @@ async function init(workout) {
       const sessions = await loadAllSessions();
       const pastCount = sessions.filter((s) => s.workoutId === workout.id).length;
       coreVariantIndex = pastCount % workout.coreVariants.length;
+      isFirstTime = pastCount === 0;
     } catch (e) {
       console.error("Failed to load past sessions", e);
     }
@@ -87,6 +104,14 @@ async function init(workout) {
 
   function renderPlan(level) {
     const plan = buildPlan(workout, level, coreVariantIndex);
+    weightedItems = [];
+    let nextIdx = 0;
+    const nextWeightIdx = (name) => {
+      if (!isFirstTime) return null;
+      const idx = nextIdx++;
+      weightedItems.push({ name, idx });
+      return idx;
+    };
 
     const warmupPanel = document.getElementById("warmupPanel");
     warmupPanel.innerHTML = `<h2>חימום</h2><div class="status-note-text">${plan.warmup.minutes} דקות ${plan.warmup.name} <span class="name-en">(${plan.warmup.nameEn})</span></div>`;
@@ -95,14 +120,21 @@ async function init(workout) {
     if (plan.activation) {
       activationPanel.innerHTML = `
         <div class="section-eyebrow">הפעלה</div>
-        ${exerciseCardHtml(plan.activation, fatigueState)}`;
+        ${exerciseCardHtml(plan.activation, fatigueState, nextWeightIdx(plan.activation.name))}`;
     } else {
       activationPanel.innerHTML = "";
     }
 
-    document.getElementById("exerciseList").innerHTML = plan.exercises.map((ex) => exerciseCardHtml(ex, fatigueState)).join("");
-    document.getElementById("coreList").innerHTML = plan.core.map((ex) => exerciseCardHtml(ex, fatigueState)).join("");
+    document.getElementById("exerciseList").innerHTML = plan.exercises
+      .map((ex) => exerciseCardHtml(ex, fatigueState, nextWeightIdx(ex.name)))
+      .join("");
+    document.getElementById("coreList").innerHTML = plan.core
+      .map((ex) => exerciseCardHtml(ex, fatigueState, nextWeightIdx(ex.name)))
+      .join("");
     document.getElementById("stretchPanel").innerHTML = stretchListHtml(plan.stretches);
+
+    const firstTimeNote = document.getElementById("firstTimeNote");
+    if (firstTimeNote) firstTimeNote.style.display = isFirstTime ? "" : "none";
 
     document.getElementById("planSection").style.display = "";
     document.getElementById("pickPrompt").style.display = "none";
@@ -132,7 +164,7 @@ async function init(workout) {
     completeBtn.disabled = true;
     completeBtn.textContent = "שומר…";
     try {
-      await saveSession({
+      const sessionData = {
         workoutId: workout.id,
         workoutLabel: workout.label,
         date: todayIso(),
@@ -140,7 +172,14 @@ async function init(workout) {
         coreVariantIndex,
         fatigue: { ...fatigueState },
         notes: document.getElementById("workoutNotes").value.trim(),
-      });
+      };
+      if (isFirstTime && weightedItems.length) {
+        sessionData.baselineWeights = weightedItems.map(({ name, idx }) => ({
+          name,
+          weightKg: parseFloat(document.getElementById(`bw-${idx}`).value) || null,
+        }));
+      }
+      await saveSession(sessionData);
       completeBtn.textContent = "✓ האימון נשמר";
       confirmEl.textContent = "האימון נרשם בהצלחה!";
       confirmEl.classList.add("show");

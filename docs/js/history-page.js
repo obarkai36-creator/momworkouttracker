@@ -24,14 +24,22 @@ function fatigueSummaryHtml(fatigue) {
 function sessionDetailHtml(workout, session) {
   const plan = buildPlan(workout, session.desiredLoad || "medium", session.coreVariantIndex || 0);
   const allExercises = [...(plan.activation ? [plan.activation] : []), ...plan.exercises, ...plan.core];
+  const weightByName = {};
+  for (const w of session.baselineWeights || []) weightByName[w.name] = w.weightKg;
+
+  const hasWeights = Object.keys(weightByName).length > 0;
   const rows = allExercises
-    .map(
-      (ex) => `
+    .map((ex) => {
+      const weightCell = hasWeights
+        ? `<td class="num">${weightByName[ex.name] != null ? weightByName[ex.name] + ' ק"ג' : "—"}</td>`
+        : "";
+      return `
     <tr>
       <td>${ex.name} <span class="name-en">(${ex.nameEn})</span></td>
       <td class="num">${ex.durationSec != null ? ex.durationSec + " שנ'" : ex.reps + " חזרות"}</td>
-    </tr>`
-    )
+      ${weightCell}
+    </tr>`;
+    })
     .join("");
 
   return `
@@ -40,9 +48,10 @@ function sessionDetailHtml(workout, session) {
       <div class="dpanel"><h4>עייפות שדווחה לפני האימון</h4>${fatigueSummaryHtml(session.fatigue)}</div>
       <div class="dpanel span"><h4>הערות</h4><div class="status-note-text">${session.notes || "—"}</div></div>
     </div>
+    ${hasWeights ? `<div class="goalline">אימון ראשון מהסוג הזה — משקלי הבסיס שנרשמו:</div>` : ""}
     <div class="scrollbox">
       <table class="datatable">
-        <thead><tr><th>תרגיל</th><th>יעד</th></tr></thead>
+        <thead><tr><th>תרגיל</th><th>יעד</th>${hasWeights ? "<th>משקל</th>" : ""}</tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
