@@ -28,7 +28,7 @@ function sessionDetailHtml(workout, session) {
     .map(
       (ex) => `
     <tr>
-      <td>${ex.name}</td>
+      <td>${ex.name} <span class="name-en">(${ex.nameEn})</span></td>
       <td class="num">${ex.durationSec != null ? ex.durationSec + " שנ'" : ex.reps + " חזרות"}</td>
     </tr>`
     )
@@ -48,7 +48,7 @@ function sessionDetailHtml(workout, session) {
 }
 
 function openModal(workout, sessionsForWorkout) {
-  document.getElementById("modalTitle").textContent = workout.label;
+  document.getElementById("modalTitle").innerHTML = `${workout.label} <span class="name-en">(${workout.labelEn})</span>`;
   document.getElementById("modalSubtitle").textContent = `${sessionsForWorkout.length} אימונים תועדו`;
 
   const body = document.getElementById("modalBody");
@@ -80,7 +80,7 @@ function workoutTile(w, sessionsForWorkout) {
   return `
   <button type="button" class="tile tap" data-id="${w.id}" style="text-align:right; width:100%; border:1px solid var(--border); font:inherit;">
     <span class="go">‹</span>
-    <h3><span class="dot" style="background:var(--${w.pillar}-b); display:inline-block; margin-inline-end:6px;"></span>${w.label}</h3>
+    <h3><span class="dot" style="background:var(--${w.pillar}-b); display:inline-block; margin-inline-end:6px;"></span>${w.label} <span class="name-en">(${w.labelEn})</span></h3>
     <div class="row"><div class="num">${sessionsForWorkout.length}<small>אימונים</small></div></div>
     <div class="sub">${last ? `אחרון: ${dateFmt(last.date)}` : "עדיין לא בוצע"}</div>
   </button>`;

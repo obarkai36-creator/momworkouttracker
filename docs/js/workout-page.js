@@ -31,7 +31,7 @@ function exerciseCardHtml(ex, fatigueState) {
   const targetText = isTime ? `${ex.sets} סטים × ${ex.durationSec} שניות` : `${ex.sets} סטים × ${ex.reps} חזרות`;
   return `
   <div class="exercise-card">
-    <h4>${ex.name}</h4>
+    <h4>${ex.name} <span class="name-en">(${ex.nameEn})</span></h4>
     <div class="target">${targetText}${ex.note ? ` · ${ex.note}` : ""} · ${MUSCLE_LABELS[ex.muscle] || ""}</div>
     ${fatigueWarningHtml(ex.muscle, fatigueState)}
     ${videoLinkHtml(ex.youtubeUrl)}
@@ -39,11 +39,13 @@ function exerciseCardHtml(ex, fatigueState) {
 }
 
 function stretchListHtml(stretches) {
-  return `<ul class="evul">${stretches.map((s) => `<li><b>${s.name}</b> ${videoLinkHtml(s.youtubeUrl)}</li>`).join("")}</ul>`;
+  return `<ul class="evul">${stretches
+    .map((s) => `<li><b>${s.name}</b> <span class="name-en">(${s.nameEn})</span> ${videoLinkHtml(s.youtubeUrl)}</li>`)
+    .join("")}</ul>`;
 }
 
 async function init(workout) {
-  document.getElementById("workoutTitle").textContent = workout.label;
+  document.getElementById("workoutTitle").innerHTML = `${workout.label} <span class="name-en">(${workout.labelEn})</span>`;
   document.getElementById("workoutSubtitle").textContent = `דגש: ${workout.focus}`;
 
   const configured = checkFirebaseReady();
@@ -64,6 +66,14 @@ async function init(workout) {
 
   const loadPick = document.getElementById("loadPick");
   loadPick.innerHTML = LOAD_LEVELS.map((l) => `<button type="button" data-level="${l.level}">${l.label}</button>`).join("");
+  // Wired immediately, before the await below — otherwise a tap on the
+  // picker is silently dropped for as long as that fetch takes (which can
+  // be several seconds, or never resolve, on a slow/blocked connection).
+  loadPick.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    onPickLevel(btn.dataset.level);
+  });
 
   if (configured) {
     try {
@@ -79,7 +89,7 @@ async function init(workout) {
     const plan = buildPlan(workout, level, coreVariantIndex);
 
     const warmupPanel = document.getElementById("warmupPanel");
-    warmupPanel.innerHTML = `<h2>חימום</h2><div class="status-note-text">${plan.warmup.minutes} דקות ${plan.warmup.name}</div>`;
+    warmupPanel.innerHTML = `<h2>חימום</h2><div class="status-note-text">${plan.warmup.minutes} דקות ${plan.warmup.name} <span class="name-en">(${plan.warmup.nameEn})</span></div>`;
 
     const activationPanel = document.getElementById("activationPanel");
     if (plan.activation) {
@@ -129,10 +139,4 @@ async function init(workout) {
       confirmEl.classList.add("show");
     }
   }
-
-  loadPick.addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
-    if (!btn) return;
-    onPickLevel(btn.dataset.level);
-  });
 }

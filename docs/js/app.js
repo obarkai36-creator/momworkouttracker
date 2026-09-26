@@ -12,7 +12,7 @@ function workoutTile(w, lastSession) {
   return `
   <a class="tile tap" href="workout.html?id=${w.id}" style="text-decoration:none; display:block;">
     <span class="go">‹</span>
-    <h3><span class="dot" style="background:var(--${w.pillar}-b); display:inline-block; margin-inline-end:6px;"></span>${w.label}</h3>
+    <h3><span class="dot" style="background:var(--${w.pillar}-b); display:inline-block; margin-inline-end:6px;"></span>${w.label} <span class="name-en">(${w.labelEn})</span></h3>
     <div class="row"><div class="num">${w.exercises.length}<small>תרגילים</small></div></div>
     <div class="sub">${lastText}</div>
   </a>`;
