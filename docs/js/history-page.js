@@ -1,5 +1,6 @@
-import { WORKOUTS, getWorkout, loadLabel } from "./data.js";
+import { WORKOUTS, getWorkout, loadLabel, buildPlan, MUSCLE_LABELS } from "./data.js";
 import { checkFirebaseReady, loadAllSessions } from "./firebase-init.js";
+import { fatigueLevelLabel } from "./body-map.js";
 
 const dateFmt = (iso) => {
   if (!iso) return "—";
@@ -12,40 +13,42 @@ function loadBadge(level) {
   return `<span class="load-badge" data-level="${level}">${loadLabel(level)}</span>`;
 }
 
-function sessionDetailHtml(session) {
-  const rows = session.exercises
-    .map((ex) => {
-      const amount =
-        ex.durationDoneSec != null
-          ? `${ex.durationDoneSec} שנ'`
-          : ex.repsDone != null
-          ? ex.repsDone
-          : "—";
-      return `
+function fatigueSummaryHtml(fatigue) {
+  const entries = Object.entries(fatigue || {}).filter(([, level]) => level && level !== "none");
+  if (!entries.length) return `<div class="status-note-text">לא דווחה עייפות מיוחדת</div>`;
+  return `<ul class="evul">${entries
+    .map(([muscle, level]) => `<li><b>${MUSCLE_LABELS[muscle] || muscle}</b> — ${fatigueLevelLabel(level)}</li>`)
+    .join("")}</ul>`;
+}
+
+function sessionDetailHtml(workout, session) {
+  const plan = buildPlan(workout, session.desiredLoad || "medium", session.coreVariantIndex || 0);
+  const allExercises = [...(plan.activation ? [plan.activation] : []), ...plan.exercises, ...plan.core];
+  const rows = allExercises
+    .map(
+      (ex) => `
     <tr>
       <td>${ex.name}</td>
-      <td class="num">${ex.weightKg != null ? ex.weightKg + " ק\"ג" : "—"}</td>
-      <td class="num">${amount}</td>
-      <td>${loadBadge(ex.loadTag)}</td>
-    </tr>`;
-    })
+      <td class="num">${ex.durationSec != null ? ex.durationSec + " שנ'" : ex.reps + " חזרות"}</td>
+    </tr>`
+    )
     .join("");
 
   return `
     <div class="dgrid" style="margin-bottom:16px;">
-      <div class="dpanel"><h4>עומס כללי</h4>${loadBadge(session.overallLoad)}</div>
-      <div class="dpanel"><h4>הערות</h4><div class="status-note-text">${session.notes || "—"}</div></div>
+      <div class="dpanel"><h4>עומס שנבחר</h4>${loadBadge(session.desiredLoad)}</div>
+      <div class="dpanel"><h4>עייפות שדווחה לפני האימון</h4>${fatigueSummaryHtml(session.fatigue)}</div>
     </div>
     <div class="scrollbox">
       <table class="datatable">
-        <thead><tr><th>תרגיל</th><th>משקל</th><th>חזרות/משך</th><th>עומס</th></tr></thead>
+        <thead><tr><th>תרגיל</th><th>יעד</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
 }
 
 function openModal(workout, sessionsForWorkout) {
-  document.getElementById("modalTitle").textContent = `${workout.label} (${workout.dateLabel})`;
+  document.getElementById("modalTitle").textContent = workout.label;
   document.getElementById("modalSubtitle").textContent = `${sessionsForWorkout.length} אימונים תועדו`;
 
   const body = document.getElementById("modalBody");
@@ -56,7 +59,7 @@ function openModal(workout, sessionsForWorkout) {
       .map(
         (s, i) => `
       <div class="section-eyebrow" style="${i === 0 ? "margin-top:0" : ""}">${dateFmt(s.date)}</div>
-      ${sessionDetailHtml(s)}`
+      ${sessionDetailHtml(workout, s)}`
       )
       .join("");
   }
@@ -77,7 +80,7 @@ function workoutTile(w, sessionsForWorkout) {
   return `
   <button type="button" class="tile tap" data-id="${w.id}" style="text-align:right; width:100%; border:1px solid var(--border); font:inherit;">
     <span class="go">‹</span>
-    <h3><span class="dot" style="background:var(--${w.pillar}-b); display:inline-block; margin-inline-end:6px;"></span>${w.label} <span class="muted small">(${w.dateLabel})</span></h3>
+    <h3><span class="dot" style="background:var(--${w.pillar}-b); display:inline-block; margin-inline-end:6px;"></span>${w.label}</h3>
     <div class="row"><div class="num">${sessionsForWorkout.length}<small>אימונים</small></div></div>
     <div class="sub">${last ? `אחרון: ${dateFmt(last.date)}` : "עדיין לא בוצע"}</div>
   </button>`;

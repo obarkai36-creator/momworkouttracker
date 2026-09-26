@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>רישום אימון — לוח האימונים של שגית</title>
-<link rel="stylesheet" href="css/tokens.css?v=2026-09-26-1">
-<link rel="stylesheet" href="css/dashboard.css?v=2026-09-26-1">
-<link rel="stylesheet" href="css/rtl.css?v=2026-09-26-1">
-<link rel="stylesheet" href="css/site.css?v=2026-09-26-1">
+<link rel="stylesheet" href="css/tokens.css?v=2026-09-26-2">
+<link rel="stylesheet" href="css/dashboard.css?v=2026-09-26-2">
+<link rel="stylesheet" href="css/rtl.css?v=2026-09-26-2">
+<link rel="stylesheet" href="css/site.css?v=2026-09-26-2">
 </head>
 <body>
 <div class="wrap">
@@ -19,49 +19,41 @@
       <div class="mark"></div>
       <div>
         <h1 id="workoutTitle">אימון</h1>
-        <div class="subtitle" id="workoutSubtitle">3 סטים × 12 חזרות לכל תרגיל</div>
+        <div class="subtitle" id="workoutSubtitle"></div>
       </div>
     </div>
   </header>
 
   <div id="config-warning" style="display:none; margin-bottom:16px;"></div>
 
-  <div class="panel span" id="detailsPanel" style="margin-bottom:16px;">
-    <h2>פרטי האימון</h2>
-    <div class="exercise-fields">
-      <div class="field">
-        <label for="sessionDate">תאריך</label>
-        <input type="date" id="sessionDate">
-      </div>
-      <div class="field">
-        <label>עומס פיזי כללי לאימון</label>
-        <div class="loadpick" id="overallLoadPick"></div>
-      </div>
-    </div>
+  <div class="panel span" style="margin-bottom:16px;">
+    <h2>איך מרגישים השרירים היום?</h2>
+    <div id="bodyMapContainer"></div>
   </div>
 
-  <div class="section-eyebrow">תרגילים</div>
-  <div id="exerciseList"></div>
-
-  <div class="section-eyebrow">תרגילי ליבה (סוף האימון)</div>
-  <div id="coreList"></div>
-
-  <div class="section-eyebrow">מתיחות</div>
-  <div class="panel span" id="stretchPanel"></div>
-
-  <div class="panel span" style="margin-top:16px;">
-    <h2>הערות</h2>
-    <div class="field">
-      <textarea id="sessionNotes" rows="3" placeholder="איך הרגשת? הערות נוספות…"></textarea>
-    </div>
-  </div>
-
-  <div style="margin-top:18px;">
-    <button class="btn-primary" id="saveBtn">שמירת האימון</button>
+  <div class="panel span" style="margin-bottom:16px;">
+    <h2>עומס רצוי לאימון</h2>
+    <div class="loadpick" id="loadPick" style="margin-bottom:8px;"></div>
     <div class="save-confirm" id="saveConfirm"></div>
   </div>
+
+  <div id="planSection" style="display:none;">
+    <div class="panel span" id="warmupPanel" style="margin-bottom:16px;"></div>
+    <div id="activationPanel"></div>
+
+    <div class="section-eyebrow">תרגילים</div>
+    <div id="exerciseList"></div>
+
+    <div class="section-eyebrow">תרגילי ליבה (סוף האימון)</div>
+    <div id="coreList"></div>
+
+    <div class="section-eyebrow">מתיחות</div>
+    <div class="panel span" id="stretchPanel"></div>
+  </div>
+
+  <div class="empty-state" id="pickPrompt">בחרי עומס למעלה כדי לראות את תוכנית האימון המלאה.</div>
 </div>
 
-<script type="module" src="js/workout-page.js?v=2026-09-26-1"></script>
+<script type="module" src="js/workout-page.js?v=2026-09-26-2"></script>
 </body>
 </html>

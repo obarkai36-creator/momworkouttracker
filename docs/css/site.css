@@ -39,6 +39,16 @@
 /* ---- pending/coming-soon block (core+stretch section, until curated) ---- */
 .pending-block { border: 1px dashed var(--border-strong); border-radius: 14px; padding: 16px; text-align: center; color: var(--text-3); font-size: 13px; background: var(--surface-inset); }
 
+/* ---- fatigue body map (front/back tappable figures) ---- */
+.bodymap { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
+.bodymap-figure { text-align: center; }
+.body-svg { touch-action: manipulation; }
+.body-region { cursor: pointer; transition: fill .15s, opacity .1s; }
+.body-region:hover, .body-region:focus-visible { opacity: .8; outline: none; }
+.bodymap-caption { font-size: 11.5px; color: var(--text-3); margin-top: 4px; }
+.bodymap-legend { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; font-size: 12px; color: var(--text-2); margin-top: 4px; }
+.bodymap-legend-item .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 4px; vertical-align: middle; border: 1px solid var(--border-strong); }
+
 /* ---- big primary action (save workout) ---- */
 .btn-primary {
   display: block; width: 100%; font: inherit; font-size: 16px; font-weight: 700;

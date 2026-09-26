@@ -1,127 +1,114 @@
 // לוח האימונים של שגית — תבניות האימונים.
 //
-// כל אימון הוא 3 סטים × 12 חזרות לכל תרגיל, אלא אם צוין אחרת (תרגילי
-// פלאנק/פלאנק צידי הם על זמן ולא על חזרות — ראו durationSec).
+// מבנה: 2 אימונים (עליון/תחתון), כל אחד:
+//  - warmup: חימום קבוע של 10 דק' הליכון (הליכה/שיפוע) — מוצג כמידע בלבד.
+//  - activation (רק באימון תחתון): תרגיל הפעלה קליל לפני התרגילים העיקריים.
+//  - exercises: כל תרגיל מתויג ב-muscle (לצורך מפת העייפות, ראו body-map.js).
+//  - coreVariants: שני זוגות תרגילי ליבה שמתחלפים לבד בין אימון לאימון (לפי
+//    מספר האימונים שכבר תועדו לתבנית הזו — ראו js/workout-page.js).
+//  - stretches: מתיחות מותאמות לשרירים שהאימון מכסה.
 //
-// תוכן זה עבר סקירת שרירים (ראו focus לכל אימון) והושלם ב:
-//  - 2 תרגילי ליבה/בטן בסוף כל אימון (core)
-//  - מתיחות מותאמות לכל אימון (stretches)
-//  - קישור הדגמה ביוטיוב לכל תרגיל (youtubeUrl) — כל הקישורים אותרו
-//    בחיפוש בפועל; תרגיל אחד (workout-3, "סטפ אפ בפלאנק קדימה") לא נמצא
-//    לו קישור מתאים מספיק ונשאר ריק בכוונה — כדאי לצלם הדגמה עצמאית לו,
-//    או לבצע אותו כשני תרגילים נפרדים (סטפ אפ + פלאנק).
-//  - השלמות לכיסוי מקיף: לא היה תרגיל שוקיים או ביצפס באף אחד מ-4
-//    האימונים — נוסף תרגיל שוקיים לאימון 1 ותרגיל ביצפס לאימון 2.
-//  - "דחיקה" (אימון 4) הוברר כ"לחיצת רגליים"; "פולי עליון בחבל" (אימון 4)
-//    הוברר כתרגיל גב (לאט פולי) ולא טריצפס.
+// זרימת השימוש (עודכן): שגית לא ממלאת משקל/חזרות בפועל בכלל. במקום זאת:
+//  1. מסמנת על מפת גוף אילו אזורים עדיין עייפים/כואבים מאימון קודם.
+//  2. בוחרת עומס רצוי אחד לכל האימון (קל/בינוני/כבד) — הקלט היחיד שלה.
+//  3. מקבלת את "תוכנית האימון הסופית": כל התרגילים עם מספר חזרות/משך מותאם
+//     לעומס שבחרה (buildPlan למטה), ותרגילים שפוגעים באזור שסימנה כעייף
+//     מסומנים באזהרה קלה. אין שום שלב מילוי נוסף אחרי סיום האימון.
 //
-// כל אימון מקבל צבע "פילר" קבוע (מתוך tokens.css) שמזהה אותו בכל האתר.
+// היגיון ההתאמה: בתרגילי כוח (עם משקל חיצוני) עומס "כבד" = פחות חזרות
+// (כי היא תבחר משקל כבד יותר בהתאם) ועומס "קל" = יותר חזרות. בתרגילי ליבה
+// ללא משקל חיצוני זה הפוך: "כבד" = יותר חזרות/משך (כי אין משקל להוסיף,
+// הקושי עולה עם הזמן/הכמות).
+//
+// עדכון לפי ציוד המכון בפועל (הוחלף בבקשת המשתמש):
+//  - "הרחקות עם גומייה" → "הרמות צד עם משקולות" (המכון לא כולל את הגומייה).
+//  - "פייס פול" → "הרמות קדמיות עם משקולות". שימו לב: זה יוצר כפילות זווית
+//    עם "כתפיים בפולי עם חבל" (שניהם כתף קדמית) ומאבד לגמרי את זווית הכתף
+//    האחורית שפייס פול נתן. אם יש למכון פתרון חלופי לכתף אחורית (למשל
+//    ריר דלט פליי/Reverse fly), כדאי להציע כתחליף.
+//  - "ישבן בגומייה" הוסר לגמרי (ללא תחליף שהתבקש).
+//  - "דדליפט על ספסל – סינגל לג" → "כפיפת ברכיים בישיבה במכונה". שימו לב:
+//    זה מאבד את תבנית התנועה של כפיפת ירך (hip-hinge) מהאימון לגמרי, ויוצר
+//    כפילות עם "כפיפת ברכיים בשכיבה במכונה" הקיים (שניהם בידוד המסטרינג
+//    בכיפוף ברך). שווה לשקול אם המכון כן מאפשר תבנית hip-hinge כלשהי
+//    (רומנית עם משקולות, גם-גוד-מורנינג וכו').
 export const WORKOUTS = [
   {
-    id: "workout-1",
-    label: "אימון 1",
-    dateLabel: "28.7",
+    id: "upper-body",
+    label: "אימון עליון",
     pillar: "pillar1",
-    focus: "חזה, גב, כתפיים, רגליים, ישבן, שוקיים",
+    focus: "חזה, גב (3 זוויות), כתפיים (קדמי/צדדי/אחורי), טריצפס, ביצפס",
+    warmup: { name: "הליכון — הליכה או הליכה בשיפוע", minutes: 10 },
+    activation: null,
     exercises: [
-      { name: "גובלט סקוואט", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=xIU3-8WqasQ" },
-      { name: "היפ תראסט", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=z8WwUC_UA4w" },
-      { name: "משיכה בפולי עליון", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=j9jtjL8FhPI" },
-      { name: "לחיצת רגליים במכונה", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=K5n2vg3oZa4" },
-      { name: "חתירה בישיבה במכונה", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=7BkgqzC6WsM" },
-      { name: "הרחקות עם גומייה", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=gfEyrmxbCbw" },
-      { name: "לחיצת חזה במכונה", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=rY0B8UFdne0" },
-      { name: "הרמת שוקיים בעמידה", sets: 3, reps: 15, youtubeUrl: "https://www.youtube.com/watch?v=ndQc4mz4mBU", note: "נוסף — שוקיים לא היו מכוסים באף אימון אחר" },
+      { name: "לחיצת חזה במכונה", muscle: "chest", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=rY0B8UFdne0" },
+      { name: "שכיבות סמיכה על מדרגה", muscle: "chest", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=4aUUcfwyfE0" },
+      { name: "משיכה בפולי עליון", muscle: "back", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=j9jtjL8FhPI" },
+      { name: "חתירה בישיבה במכונה", muscle: "back", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=7BkgqzC6WsM" },
+      { name: "פול אובר", muscle: "back", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=tcHaHIQStsk" },
+      { name: "הרמות צד עם משקולות", muscle: "shoulders", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=Y29xKcze8Ik", note: "כתף — צדדי (הוחלף מגומייה)" },
+      { name: "כתפיים בפולי עם חבל", muscle: "shoulders", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=p0aY0nYUno8", note: "כתף — קדמי" },
+      { name: "הרמות קדמיות עם משקולות", muscle: "shoulders", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=CH9JzDStL3U", note: "כתף — קדמי (הוחלף מפייס פול; כפילות זווית עם התרגיל שמעליו — ראו הערה למטה)" },
+      { name: "יד אחורית על ספסל", muscle: "triceps", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=AbOUz070DC4" },
+      { name: "כפיפת זרועות עם משקולת", muscle: "biceps", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=6DeLZ6cbgWQ" },
     ],
-    core: [
-      { name: "פלאנק", sets: 3, durationSec: 30, youtubeUrl: "https://www.youtube.com/watch?v=mwlp75MS6Rg" },
-      { name: "פיתולי בטן רוסיים עם משקולת", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=TfTUk2AjV7g" },
+    coreVariants: [
+      [
+        { name: "פלאנק", muscle: "core", sets: 3, durationSec: 30, youtubeUrl: "https://www.youtube.com/watch?v=mwlp75MS6Rg" },
+        { name: "כפיפות בטן אופניים", muscle: "core", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=PAEo-zRSanM" },
+      ],
+      [
+        { name: "פלאנק צידי (לכל צד)", muscle: "core", sets: 3, durationSec: 20, youtubeUrl: "https://www.youtube.com/watch?v=Ujf5ELfqI7o" },
+        { name: "וודצ'ופ בפולי (לכל צד)", muscle: "core", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=Gwcf4TOj1hc" },
+      ],
     ],
     stretches: [
-      { name: "מתיחת ירך קדמית בעמידה", youtubeUrl: "https://www.youtube.com/watch?v=kzAsm4WQqvQ" },
-      { name: "מתיחת גלוטאוס בישיבה", youtubeUrl: "https://www.youtube.com/watch?v=OcfcKXTaEkA" },
       { name: "מתיחת חזה בפתח דלת", youtubeUrl: "https://www.youtube.com/watch?v=h4M4XmCBFd8" },
-      { name: "תנוחת הילד", youtubeUrl: "https://www.youtube.com/watch?v=jaCOZJPSy2g" },
-    ],
-  },
-  {
-    id: "workout-2",
-    label: "אימון 2",
-    dateLabel: "29.7",
-    pillar: "pillar2",
-    focus: "כתפיים, חזה, ישבן/רגליים, גב, ליבה, ביצפס",
-    exercises: [
-      { name: "לאנצ' יד קדמית", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=5V1j8nhdGt4" },
-      { name: "פרפר", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=v2yOxhv1V0M" },
-      { name: "היפ תראסט", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=z8WwUC_UA4w" },
-      { name: "פול אובר", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=tcHaHIQStsk" },
-      { name: "כפיפות בטן בשיפוע", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=gFnEw7cIgto" },
-      { name: "סקוואט סומו", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=kjlfpqXnyL8" },
-      { name: "כפיפת זרועות עם משקולת", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=6DeLZ6cbgWQ", note: "נוסף — ביצפס לא היה מכוסה באף אימון אחר" },
-    ],
-    core: [
-      { name: "פלאנק צידי (לכל צד)", sets: 3, durationSec: 20, youtubeUrl: "https://www.youtube.com/watch?v=Ujf5ELfqI7o" },
-      { name: "הרמות רגליים בשכיבה", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=sY2ZgV2Sj_s" },
-    ],
-    stretches: [
-      { name: "מתיחת מכפיפי ירך בכריעה", youtubeUrl: "https://www.youtube.com/watch?v=Q4Ko275cluo" },
-      { name: "מתיחת חזה בפתח דלת", youtubeUrl: "https://www.youtube.com/watch?v=h4M4XmCBFd8" },
-      { name: "מתיחת חתול-פרה", youtubeUrl: "https://www.youtube.com/watch?v=xyNwxiuERXc" },
-      { name: "מתיחת המסטרינג בישיבה", youtubeUrl: "https://www.youtube.com/watch?v=oJX8EKF3TqM" },
-    ],
-  },
-  {
-    id: "workout-3",
-    label: "אימון 3",
-    dateLabel: "2.8",
-    pillar: "pillar3",
-    focus: "רגליים, ישבן/המסטרינג, טריצפס, כתפיים, חזה",
-    exercises: [
-      { name: "סטפ אפ בפלאנק קדימה עם רגל על משוקולת", sets: 3, reps: 12, youtubeUrl: "", note: "לא נמצא קישור הדגמה מתאים לתרגיל המשולב הזה — כדאי לצלם הדגמה עצמאית, או לפצל לשני תרגילים (סטפ אפ + פלאנק) שלהם יש הדגמות רבות" },
-      { name: "סקוואט עם גומייה עם התקדמות", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=CNOmK_nE5zM" },
-      { name: "יד אחורית על ספסל", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=AbOUz070DC4" },
-      { name: "לאנצ' על מדרגה", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=QNq2xfnX9IU" },
-      { name: "מרחיקים", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=Oy9M4AoYnGA" },
-      { name: "שכיבות סמיכה על מדרגה", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=4aUUcfwyfE0" },
-      { name: "כתפיים בפולי עם חבל", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=p0aY0nYUno8" },
-      { name: "דדליפט על ספסל – סינגל לג", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=HuJhhZX4_r0" },
-    ],
-    core: [
-      { name: "וודצ'ופ בפולי (לכל צד)", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=Gwcf4TOj1hc" },
-      { name: "כפיפות בטן אופניים", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=PAEo-zRSanM" },
-    ],
-    stretches: [
-      { name: "מתיחת ירך קדמית בעמידה", youtubeUrl: "https://www.youtube.com/watch?v=kzAsm4WQqvQ" },
-      { name: "מתיחת המסטרינג בישיבה", youtubeUrl: "https://www.youtube.com/watch?v=oJX8EKF3TqM" },
+      { name: "מתיחת כתף חוצה גוף", youtubeUrl: "https://www.youtube.com/watch?v=O5bFanxcpWE" },
       { name: "מתיחת יד אחורית מעל הראש", youtubeUrl: "https://www.youtube.com/watch?v=cPTrm13hSSo" },
-      { name: "מתיחת כתף חוצה גוף", youtubeUrl: "https://www.youtube.com/watch?v=O5bFanxcpWE" },
+      { name: "מתיחת חתול-פרה", youtubeUrl: "https://www.youtube.com/watch?v=xyNwxiuERXc" },
     ],
   },
   {
-    id: "workout-4",
-    label: "אימון 4",
-    dateLabel: "4.8",
-    pillar: "pillar4",
-    focus: "ישבן, רגליים, גב, חזה, ליבה",
+    id: "lower-body",
+    label: "אימון תחתון",
+    pillar: "pillar2",
+    focus: "רגליים (קוואד + המסטרינג), ישבן (3 זוויות), שוקיים",
+    warmup: { name: "הליכון — הליכה או הליכה בשיפוע", minutes: 10 },
+    activation: {
+      name: "סקוואט עם גומייה עם התקדמות",
+      muscle: "glutes",
+      sets: 2,
+      reps: 15,
+      note: "תרגיל הפעלה לפני התרגילים העיקריים — לא מושפע מהעומס שנבחר",
+      youtubeUrl: "https://www.youtube.com/watch?v=CNOmK_nE5zM",
+    },
     exercises: [
-      { name: "הרחקה בישיבה", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=5O_Y9l__iao" },
-      { name: "ישבן בגומייה", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=LUMwbA5-GRc" },
-      { name: "לחיצת רגליים (דחיקה)", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=K5n2vg3oZa4" },
-      { name: "פולי עליון בחבל", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=duHQk2PxNos", note: "תרגיל גב (לאט) עם אחיזת חבל" },
-      { name: "כפיפות בטן", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=fTxaDVXhMnw" },
-      { name: "חזה בטי.אר.אקס", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=Dx1owRthj5Q" },
-      { name: "היפ תראסט", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=z8WwUC_UA4w" },
-      { name: "ברכיים לחזה עם משקולת", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=gP11cXEELtY" },
+      { name: "גובלט סקוואט", muscle: "quads", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=xIU3-8WqasQ" },
+      { name: "סקוואט סומו", muscle: "glutes", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=kjlfpqXnyL8" },
+      { name: "לחיצת רגליים במכונה", muscle: "quads", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=K5n2vg3oZa4" },
+      { name: "היפ תראסט", muscle: "glutes", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=z8WwUC_UA4w" },
+      { name: "הרחקה בישיבה", muscle: "glutes", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=5O_Y9l__iao" },
+      { name: "לאנצ' על מדרגה", muscle: "quads", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=QNq2xfnX9IU" },
+      { name: "כפיפת ברכיים בישיבה במכונה", muscle: "hamstrings", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=t9sTSr-JYSs", note: "הוחלף מדדליפט על ספסל" },
+      { name: "כפיפת ברכיים בשכיבה במכונה", muscle: "hamstrings", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=vl5nUdE9mWM", note: "המסטרינג בבידוד — כפילות זווית עם התרגיל שמעליו, ראו הערה למטה" },
+      { name: "הרמת שוקיים בעמידה", muscle: "calves", sets: 3, reps: 15, youtubeUrl: "https://www.youtube.com/watch?v=ndQc4mz4mBU" },
     ],
-    core: [
-      { name: "דד באג (לכל צד)", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=bxn9FBrt4-A" },
-      { name: "פלאנק עם מגע בכתף", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=eT93C-xUZI8" },
+    coreVariants: [
+      [
+        { name: "דד באג (לכל צד)", muscle: "core", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=bxn9FBrt4-A" },
+        { name: "הרמות רגליים בשכיבה", muscle: "core", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=sY2ZgV2Sj_s" },
+      ],
+      [
+        { name: "פלאנק עם מגע בכתף", muscle: "core", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=eT93C-xUZI8" },
+        { name: "פיתולי בטן רוסיים עם משקולת", muscle: "core", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=TfTUk2AjV7g" },
+      ],
     ],
     stretches: [
+      { name: "מתיחת ירך קדמית בעמידה", youtubeUrl: "https://www.youtube.com/watch?v=kzAsm4WQqvQ" },
       { name: "מתיחת גלוטאוס בישיבה", youtubeUrl: "https://www.youtube.com/watch?v=OcfcKXTaEkA" },
+      { name: "מתיחת המסטרינג בישיבה", youtubeUrl: "https://www.youtube.com/watch?v=oJX8EKF3TqM" },
       { name: "מתיחת מכפיפי ירך בכריעה", youtubeUrl: "https://www.youtube.com/watch?v=Q4Ko275cluo" },
-      { name: "מתיחת חזה בפתח דלת", youtubeUrl: "https://www.youtube.com/watch?v=h4M4XmCBFd8" },
-      { name: "מתיחת כתף חוצה גוף", youtubeUrl: "https://www.youtube.com/watch?v=O5bFanxcpWE" },
     ],
   },
 ];
@@ -132,10 +119,55 @@ export const LOAD_LEVELS = [
   { level: "heavy", label: "כבד" },
 ];
 
+// Muscle tags used both by exercises above and by the body-fatigue map
+// (js/body-map.js uses these same ids for its clickable regions).
+export const MUSCLE_LABELS = {
+  chest: "חזה",
+  back: "גב",
+  shoulders: "כתפיים",
+  biceps: "ביצפס",
+  triceps: "טריצפס",
+  quads: "קוואדריספס",
+  glutes: "ישבן",
+  hamstrings: "המסטרינג",
+  calves: "שוקיים",
+  core: "ליבה/בטן",
+};
+
 export function getWorkout(id) {
   return WORKOUTS.find((w) => w.id === id) || null;
 }
 
 export function loadLabel(level) {
   return LOAD_LEVELS.find((l) => l.level === level)?.label || "—";
+}
+
+// Weighted exercises: heavier chosen intensity -> fewer prescribed reps
+// (she picks a heavier weight to match, autoregulating by feel).
+const STRENGTH_REP_DELTA = { light: 3, medium: 0, heavy: -3 };
+// Bodyweight core work: no external weight to adjust, so harder = more
+// reps/longer hold instead.
+const CORE_REP_DELTA = { light: -2, medium: 0, heavy: 3 };
+const DURATION_MULT = { light: 0.7, medium: 1, heavy: 1.5 };
+
+function scale(ex, repDelta, durationMult) {
+  if (ex.durationSec != null) {
+    const sec = Math.max(10, Math.round((ex.durationSec * (durationMult[ex._level] ?? 1)) / 5) * 5);
+    return { ...ex, durationSec: sec };
+  }
+  return { ...ex, reps: Math.max(6, ex.reps + (repDelta[ex._level] ?? 0)) };
+}
+
+/** Resolves a workout template + chosen intensity level + which core-variant
+ * index into the exact, final plan to display/log — no other input needed. */
+export function buildPlan(workout, level, coreVariantIndex = 0) {
+  const withLevel = (ex) => ({ ...ex, _level: level });
+  const core = workout.coreVariants[coreVariantIndex % workout.coreVariants.length];
+  return {
+    warmup: workout.warmup,
+    activation: workout.activation ? scale(withLevel(workout.activation), { light: 0, medium: 0, heavy: 0 }, DURATION_MULT) : null,
+    exercises: workout.exercises.map((ex) => scale(withLevel(ex), STRENGTH_REP_DELTA, DURATION_MULT)),
+    core: core.map((ex) => scale(withLevel(ex), CORE_REP_DELTA, DURATION_MULT)),
+    stretches: workout.stretches,
+  };
 }
