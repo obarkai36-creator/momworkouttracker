@@ -98,7 +98,8 @@ export const WORKOUTS = [
       { name: "לאנצ' על מדרגה", nameEn: "Step Lunge", muscle: "quads", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=QNq2xfnX9IU" },
       { name: "כפיפת ברכיים בישיבה במכונה", nameEn: "Seated Leg Curl Machine", muscle: "hamstrings", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=t9sTSr-JYSs", note: "הוחלף מדדליפט על ספסל" },
       { name: "בעיטה אחורית בישבן במכונה", nameEn: "Glute Kickback Machine", muscle: "glutes", sets: 3, reps: 12, youtubeUrl: "https://www.youtube.com/watch?v=24pvhNOoK80", note: "נוסף במקום כפיפת ברכיים בשכיבה שהוסרה" },
-      { name: "הרמת שוקיים בעמידה", nameEn: "Standing Calf Raise", muscle: "calves", sets: 3, reps: 15, youtubeUrl: "https://www.youtube.com/watch?v=ndQc4mz4mBU" },
+      { name: "הרמת שוקיים בעמידה", nameEn: "Standing Calf Raise", muscle: "calves", sets: 3, reps: 15, youtubeUrl: "https://www.youtube.com/watch?v=ndQc4mz4mBU", note: "ברך ישרה — גסטרוקנמיוס" },
+      { name: "הרמת שוקיים בישיבה במכונה", nameEn: "Seated Calf Raise Machine", muscle: "calves", sets: 3, reps: 15, youtubeUrl: "https://www.youtube.com/watch?v=I1uQtobaNRQ", note: "נוסף — ברך כפופה, סוליאוס (משלים ולא כפול לתרגיל שמעליו)" },
     ],
     coreVariants: [
       [
